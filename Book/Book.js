@@ -9,7 +9,6 @@ require("./BookModel");
 const Book = mongoose.model("Book");
 //connect
 mongoose.connect(
-    
   "mongodb://localhost:27017/BookService",
   { useUnifiedTopology: true, useNewUrlParser: true },
   () => {
@@ -31,15 +30,53 @@ app.post("/book", (req, res) => {
   };
   //create new book
   var book = new Book(newBook);
-  book.save().then(() => {
+  book
+    .save()
+    .then(() => {
       console.log("new book created");
-  }).catch((err) => {
-      if(err){
-          throw err ;
+    })
+    .catch(err => {
+      if (err) {
+        throw err;
       }
-  });
+    });
   res.send("testing our book route");
 });
+//list all the books in mongo db
+app.get("/books", (req, res) => {
+  Book.find()
+    .then(books => {
+      res.json(books);
+    })
+    .catch(err => {
+      if (err) {
+        throw err;
+      }
+    });
+});
+app.get('/book/:id',(req,res) => {
+    Book.findById(req.params.id).then((book) => {
+        if(book){
+            res.json(book);
+        }else {
+            res.sendStatus(404);
+        }
+    }).catch(err => {
+        if(err){
+            console.log(err);
+        }
+    })
+   // res.send(req.params.id)
+})
+app.delete("/book/:id" , (req,res) => {
+  Book.findOneAndDelete(req.params.id).then( () => {
+    res.send("book deleted");
+  }).catch(err => {
+    if(err){
+      throw err ;
+    }
+  })
+})
 app.listen(4545, () => {
   console.log("up and running ! with port 4545");
 });
